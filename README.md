@@ -6,6 +6,8 @@ The idea with this project is to make a cheap 4" x 4" PCB that can fit most of t
 
 The purpose is to play games such as Tetris and Space Invaders clones that I will program in 6502 assembly.<br>
 
+I'm doing this in order to wait for the <a href="https://www.microchip.com/en-us/product/PIC32CZ8110CA80144">PIC32CZ8110CA80144</a> microcontroller to come out in the LQFP-144 package (promised by the end of the year!).  Once that is out, I will get back to projects similar to my <a href="https://github.com/stevenchadburrow/AcolyteHandheld">Acolyte Handheld<a>.<br>
+
 <b>Specs:</b><br>
 - W65C02 running at 3.14 MHz<br>
 - 32 KB of RAM (30 KB of which is Video RAM)<br>

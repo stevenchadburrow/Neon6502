@@ -16,5 +16,10 @@ The purpose is to play games such as Tetris and Space Invaders clones that I wil
 - USB-B to power device<br>
 - No VIA, no audio, no keyboard, no UART, no external devices<br>
 
+<b>Memory Map:</b><br>
+- $0000 - $07FF = RAM<br>
+- $0800 - $7FFF = Video RAM<br>
+- $8000 - $FFFF = ROM<br>
+
 <b>Pictures:</b><br>
 <img src="Neo6502-PCB.png"><br>

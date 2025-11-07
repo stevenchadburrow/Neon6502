@@ -1007,7 +1007,7 @@ int main()
 
 	// OpenGL initialization
 	if (!glfwInit()) return 0;
-	window = glfwCreateWindow(opengl_window_x, opengl_window_y, "PICnes", NULL, NULL);
+	window = glfwCreateWindow(opengl_window_x, opengl_window_y, "Neo6502", NULL, NULL);
 	if (!window) { glfwTerminate(); return 0; }
 	glfwMakeContextCurrent(window);
 	InitializeOpenGLSettings();

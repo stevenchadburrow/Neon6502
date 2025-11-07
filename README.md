@@ -24,5 +24,5 @@ I'm doing this in order to wait for the <a href="https://www.microchip.com/en-us
 <b>Pictures:</b><br>
 Proposed PCB layout. I ran the auto-router and everything seemed fine.<br>
 <img src="Neo6502-PCB.png"><br>
-Testing out the image converter and assembly code.<br>
+Testing out the image converter, assembly code, and simulator.<br>
 <img src="Neo6502-Mandelbrot.png"><br>

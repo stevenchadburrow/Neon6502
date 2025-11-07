@@ -1,4 +1,7 @@
-// generates 64KB of sync signals for the Flash ROM
+
+// Neo6502-SyncSignals.c
+
+// Generates 64KB of sync signals for the Flash ROM
 
 /*
 VGA Signal 640 x 480 @ 60 Hz Industry standard timing

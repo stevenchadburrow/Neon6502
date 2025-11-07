@@ -285,21 +285,22 @@ void cpu_irq()
 {
 	//printf("IRQ %04X %02X\n", (unsigned int)cpu_reg_pc, (unsigned int)ppu_scanline_count);
 	
-	cpu_flag_b = 0;
-			
-	cpu_value = ((cpu_reg_pc)>>8);
-	CPU_PUSH;
-	cpu_value = ((cpu_reg_pc)&0x00FF);
-	CPU_PUSH;
-	cpu_value = ((cpu_flag_n<<7)|(cpu_flag_v<<6)|(0x20)|(cpu_flag_b<<4)|
-		(cpu_flag_d<<3)|(cpu_flag_i<<2)|(cpu_flag_z<<1)|cpu_flag_c);
-	CPU_PUSH;
-	cpu_reg_pc = (unsigned long)cpu_read(0xFFFE);
-	cpu_reg_pc += ((unsigned long)cpu_read(0xFFFF)<<8);
-
-	cpu_cycles += 7;
-	
-	cpu_flag_i = 1;
+	if (cpu_flag_i == 0)
+	{
+		cpu_flag_b = 0;
+				
+		cpu_value = ((cpu_reg_pc)>>8);
+		CPU_PUSH;
+		cpu_value = ((cpu_reg_pc)&0x00FF);
+		CPU_PUSH;
+		cpu_value = ((cpu_flag_n<<7)|(cpu_flag_v<<6)|(0x20)|(cpu_flag_b<<4)|
+			(cpu_flag_d<<3)|(cpu_flag_i<<2)|(cpu_flag_z<<1)|cpu_flag_c);
+		CPU_PUSH;
+		cpu_reg_pc = (unsigned long)cpu_read(0xFFFE);
+		cpu_reg_pc += ((unsigned long)cpu_read(0xFFFF)<<8);
+		
+		cpu_flag_i = 1;
+	}
 }
 
 void cpu_nmi()
@@ -317,8 +318,6 @@ void cpu_nmi()
 	CPU_PUSH;
 	cpu_reg_pc = (unsigned long)cpu_read(0xFFFA);
 	cpu_reg_pc += ((unsigned long)cpu_read(0xFFFB)<<8);
-
-	cpu_cycles += 7;
 }
 
 void cpu_brk()
@@ -337,8 +336,6 @@ void cpu_brk()
 	CPU_PUSH;
 	cpu_reg_pc = (unsigned long)cpu_read(0xFFFE);
 	cpu_reg_pc += ((unsigned long)cpu_read(0xFFFF)<<8);
-
-	cpu_cycles += 7;
 
 	cpu_flag_i = 1;
 }
@@ -1018,22 +1015,62 @@ int main()
 
 	unsigned long previous_clock = 0;
 
-	unsigned long total_cycles = 0;
+	unsigned long temp_cycles = 0;
+	unsigned long scanline_cycles = 0;
+	unsigned long frame_cycles = 0;
 
 	unsigned char color_byte = 0;
 
 	cpu_reg_pc = (unsigned char)cpu_memory[0xFFFC] + ((unsigned char)cpu_memory[0xFFFD] << 8);
 
-	unsigned char running = 1;
+	unsigned char running, loop;
+
+	running = 1;
 
 	while (running > 0)
 	{
-		while (total_cycles < 52448) // for 3.14 MHz
-		{
-			total_cycles += cpu_run();
-		}
+		scanline_cycles = 0;
 
-		total_cycles -= 52448;
+		loop = 1;
+
+		while (loop)
+		{
+			temp_cycles += cpu_run();
+
+			scanline_cycles += temp_cycles;
+
+			if (scanline_cycles >= 100) // for 3.14 MHz
+			{
+				scanline_cycles -= 100;
+	
+				cpu_irq(); // once every scanline
+
+				frame_cycles += 7;
+			}
+
+			frame_cycles += temp_cycles;
+
+			if (frame_cycles >= 52448) // for 3.14 MHz
+			{
+				frame_cycles -= 52448;
+		
+				cpu_nmi(); // once every frame
+				
+				frame_cycles += 7;
+
+				loop = 0;
+			}
+
+			if (opengl_keyboard_state[GLFW_KEY_W] == 1) { }
+			if (opengl_keyboard_state[GLFW_KEY_S] == 1) { }
+			if (opengl_keyboard_state[GLFW_KEY_A] == 1) { }
+			if (opengl_keyboard_state[GLFW_KEY_D] == 1) { }
+
+			if (opengl_keyboard_state[GLFW_KEY_I] == 1) { }
+			if (opengl_keyboard_state[GLFW_KEY_K] == 1) { }
+			if (opengl_keyboard_state[GLFW_KEY_J] == 1) { }
+			if (opengl_keyboard_state[GLFW_KEY_L] == 1) { }
+		}
 
 		if (glfwWindowShouldClose(window)) running = 0; // makes ESCAPE exit program
 
@@ -1052,15 +1089,17 @@ int main()
 				{
 					if ((color_byte & 0xC0) == 0xC0) // white
 					{
-						glColor3f(1.0f, 1.0f, 1.0f);
+						glColor3f(1.0f, 1.0f, 1.0f); // white
 					}
 					else if ((color_byte & 0xC0) == 0x80) // red/orange
 					{
-						glColor3f(1.0f, 0.0f, 0.0f);
+						//glColor3f(1.0f, 0.0f, 0.0f); // red
+						glColor3f(618.0f/700.0f, 308.0f/700.0f, 0.0f); // orange
 					}
 					else if ((color_byte & 0xC0) == 0x40) // cyan/blue
 					{
-						glColor3f(0.0f, 1.0f, 1.0f);
+						//glColor3f(0.0f, 1.0f, 1.0f); // cyan
+						glColor3f(0.0f, 308.0f/700.0f, 618.0f/700.0f); // blue
 					}
 					else if ((color_byte & 0xC0) == 0x00) // black
 					{
@@ -1082,16 +1121,6 @@ int main()
 		glfwSwapInterval(0); // turn off v-sync
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
-		if (opengl_keyboard_state[GLFW_KEY_W] == 1) { }
-		if (opengl_keyboard_state[GLFW_KEY_S] == 1) { }
-		if (opengl_keyboard_state[GLFW_KEY_A] == 1) { }
-		if (opengl_keyboard_state[GLFW_KEY_D] == 1) { }
-
-		if (opengl_keyboard_state[GLFW_KEY_I] == 1) { }
-		if (opengl_keyboard_state[GLFW_KEY_K] == 1) { }
-		if (opengl_keyboard_state[GLFW_KEY_J] == 1) { }
-		if (opengl_keyboard_state[GLFW_KEY_L] == 1) { }
 
 		while (clock() < previous_clock + 16667) { } // for 60 Hz
 		previous_clock = clock();	

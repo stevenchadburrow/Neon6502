@@ -22,4 +22,5 @@ I'm doing this in order to wait for the <a href="https://www.microchip.com/en-us
 - $8000 - $FFFF = ROM<br>
 
 <b>Pictures:</b><br>
+Proposed PCB layout, ran auto-router and everything seemed fine.<br>
 <img src="Neo6502-PCB.png"><br>

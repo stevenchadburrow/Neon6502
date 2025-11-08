@@ -23,7 +23,7 @@ I'm doing this in order to wait for the <a href="https://www.microchip.com/en-us
 
 <b>History:</b><br>
 As this is a revisiting of previous projects and skills, I feel the need to try to catalog my progress up to this point.  Below is a timeline of projects completed with a few details.<br>
-- Aug 2021: After the quarantine, I went back to work at the school physically.  I never went upstairs into my office but stayed in my classroom with a Linux computer to occupy my time.  I started researching how to make a water-based calculator, but found electricity to be far better.  I researched about 74' logic chips and reach out to Garth who redirected me to the 6502.org Forum <a href="http://forum.6502.org/">here</a>.
+- Aug 2021: After the quarantine, I went back to work at the school physically.  I never went upstairs into my office but stayed in my classroom with a Linux computer to occupy my time.  I started researching how to make a water-based calculator, but found electricity to be far better.  I researched about 74' logic chips and eventually reached out to Garth who redirected me to the 6502.org Forum <a href="http://forum.6502.org/">here</a>.
 - Oct 2021: The very first 6502 build, called "V1" by Bill (plasmo).  Made on perf-board, each wire hand-soldered.  I had crossed A4 and A11 on the RAM, Bill found this and fixed it for me.  It had only a couple of buttons and a 16x2 LCD.
 - Nov 2021: I made a duplicate of V1 on a PCB, which I called "V2".  No bodges were required, though it wasn't very useful.
 - Jan 2022: I made V3 and even a V4, adding features such as PS/2 keyboard and ROM banks.  I tried to add VGA video using 74' logic chips for all sync calculations, but they were all failures.

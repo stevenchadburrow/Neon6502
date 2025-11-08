@@ -1,4 +1,4 @@
-// Neo6502-Parser.c
+// Neon6502-Parser.c
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,17 +1,17 @@
 
-; Neo6502-Program.asm
+; Neon6502-Program.asm
 
 ; To compile:
-; ./dev65/bin/as65 Neo6502-Program.asm
+; ./dev65/bin/as65 Neon6502-Program.asm
 
 ; To parse:
-; ./Neo6502-Parser.o Neo6502-Program.lst Neo6502-Program.bin 32768 0 32768 0
+; ./Neon6502-Parser.o Neon6502-Program.lst Neon6502-Program.bin 32768 0 32768 0
 
 ; To burn:
-; minipro -p "SST39SF010" -w Neo6502-Program.bin
+; minipro -p "SST39SF010" -w Neon6502-Program.bin
 
 ; To simulate:
-; ./Neo6502-Simulator.o Neo6502-Program.bin
+; ./Neon6502-Simulator.o Neon6502-Program.bin
 
 	.65C02
 

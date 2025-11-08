@@ -1,7 +1,7 @@
 
-// Neo6502-Simulator.c
+// Neon6502-Simulator.c
 
-// To compile:  gcc -o Neo6502-Simulator.o Neo6502-Simulator.c -lglfw -lGL
+// To compile:  gcc -o Neon6502-Simulator.o Neon6502-Simulator.c -lglfw -lGL
 
 // Simulates code for the Neo6502
 
@@ -997,7 +997,7 @@ int main(const int argc, const char **argv)
 
 	// OpenGL initialization
 	if (!glfwInit()) return 0;
-	window = glfwCreateWindow(opengl_window_x, opengl_window_y, "Neo6502", NULL, NULL);
+	window = glfwCreateWindow(opengl_window_x, opengl_window_y, "Neon6502", NULL, NULL);
 	if (!window) { glfwTerminate(); return 0; }
 	glfwMakeContextCurrent(window);
 	InitializeOpenGLSettings();

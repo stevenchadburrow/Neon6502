@@ -1,5 +1,5 @@
 
-// Neo6502-ImageConverter.c
+// Neon6502-ImageConverter.c
 
 // Converts a 320x240 BMP image that uses white, red, cyan, and black, into hex code essentially.
 

@@ -1,5 +1,5 @@
 
-// Neo6502-SyncSignals.c
+// Neon6502-SyncSignals.c
 
 // Generates 64KB of sync signals for the Flash ROM
 

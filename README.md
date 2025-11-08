@@ -22,7 +22,7 @@ I'm doing this in order to wait for the <a href="https://www.microchip.com/en-us
 - $8000 - $FFFF = ROM<br>
 
 <b>Pictures:</b><br>
-Proposed PCB layout. I ran the auto-router and everything seemed fine.<br>
+Pictures of the PCB, Gerber files also included.<br>
 <img src="Neon6502-PCB.png"><br>
 Testing out the image converter, assembly code, and simulator.<br>
 <img src="Neon6502-Mandelbrot.png"><br>

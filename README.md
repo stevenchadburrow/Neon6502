@@ -21,6 +21,14 @@ I'm doing this in order to wait for the <a href="https://www.microchip.com/en-us
 - $0800 - $7FFF = Video RAM<br>
 - $8000 - $FFFF = ROM<br>
 
+<b>History:</b><br>
+As this is a revisiting of previous projects and skills, I feel the need to try to catalog my progress up to this point.  Below is a timeline of projects completed with a few details.<br>
+- Oct 2021: The very first 6502 build, called "V1" by Bill (plasmo).  Made on perf-board, each wire hand-soldered.  I had crossed A4 and A11 on the RAM, Bill found this and fixed it for me.  It had only a couple of buttons and a 16x2 LCD.
+- Nov 2021: I made a duplicate of V1 on a PCB, which I called "V2".
+- Jan 2022: I made V3 and even a V4, adding features such as PS/2 keyboard and ROM banks.
+- Mar 2022: In order to create a VGA video signal, I created my "Half a Pi" board, using a dedicated Flash ROM for video signals.  It was able to output White, Red, Cyan, and Black.  I was able to showcase it at the upcoming Math Appreciation Day 2022.
+- 
+
 <b>Pictures:</b><br>
 Pictures of the PCB, Gerber files also included.<br>
 <img src="Neon6502-PCB.png"><br>

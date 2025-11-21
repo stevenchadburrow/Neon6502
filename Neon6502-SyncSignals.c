@@ -109,6 +109,7 @@ int main()
 		for (int x=0; x<2; x++) // front porch
 		{
 			fprintf(out_file, "%c", out_byte("1001_1101")); // IRQ triggered here
+			//fprintf(out_file, "%c", out_byte("1101_1101"));
 		}
 		
 		for (int x=0; x<12; x++) // horizontal sync
@@ -139,6 +140,7 @@ int main()
 		for (int x=0; x<2; x++) // front porch
 		{
 			fprintf(out_file, "%c", out_byte("1001_1101")); // IRQ triggered here
+			//fprintf(out_file, "%c", out_byte("1101_1101"));
 		}
 		
 		for (int x=0; x<12; x++) // horizontal sync
@@ -169,6 +171,7 @@ int main()
 		for (int x=0; x<2; x++) // front porch
 		{
 			fprintf(out_file, "%c", out_byte("1001_1101")); // IRQ triggered here
+			//fprintf(out_file, "%c", out_byte("1101_1101"));
 		}
 		
 		for (int x=0; x<12; x++) // horizontal sync
@@ -194,28 +197,34 @@ int main()
 		for (int x=0; x<80; x++) // visible region
 		{
 			fprintf(out_file, "%c", out_byte("0100_1101"));
+			//fprintf(out_file, "%c", out_byte("1100_1101"));
 		}
 
 		for (int x=0; x<2; x++) // front porch
 		{
 			fprintf(out_file, "%c", out_byte("0000_1101")); // IRQ triggered here
+			//fprintf(out_file, "%c", out_byte("1100_1101"));
 		}
 		
 		for (int x=0; x<12; x++) // horizontal sync
 		{
 			fprintf(out_file, "%c", out_byte("0100_0101"));
+			//fprintf(out_file, "%c", out_byte("1100_0101"));
 		}
 	
 		for (int x=0; x<5; x++) // back porch
 		{
 			fprintf(out_file, "%c", out_byte("0100_1101"));
+			//fprintf(out_file, "%c", out_byte("1100_1101"));
 		}
 
 		fprintf(out_file, "%c", out_byte("0100_1110")); // horizontal reset
+		//fprintf(out_file, "%c", out_byte("1100_1110"));
 
 		for (int x=0; x<28; x++) // filler
 		{
 			fprintf(out_file, "%c", out_byte("0100_1110")); // horizontal reset
+			//fprintf(out_file, "%c", out_byte("1100_1110"));
 		}
 	}
 
@@ -232,6 +241,7 @@ int main()
 		for (int x=0; x<2; x++) // front porch
 		{
 			fprintf(out_file, "%c", out_byte("1001_1101")); // IRQ triggered here
+			//fprintf(out_file, "%c", out_byte("1101_1101"));
 		}
 		
 		for (int x=0; x<12; x++) // horizontal sync

@@ -1,16 +1,19 @@
 
 ; Neon6502-Program.asm
 
-; To compile:
+; To compile
 ; ./dev65/bin/as65 Neon6502-Program.asm
 
-; To parse:
+; To parse
 ; ./Neon6502-Parser.o Neon6502-Program.lst Neon6502-Program.bin 32768 0 32768 0
 
-; To burn:
-; minipro -p "SST39SF010" -w Neon6502-Program.bin
+; To combine
+; ./Neon6502-Combiner.o Neon6502-SyncSignals.bin Neon6502-Program.bin Neon6502-Flash128KB.bin
 
-; To simulate:
+; To burn
+; minipro -p "SST39SF010" -w Neon6502-Flash128KB.bin
+
+; To simulate
 ; ./Neon6502-Simulator.o Neon6502-Program.bin
 
 	.65C02
@@ -69,8 +72,12 @@ next2
 	BNE loop1
 
 inf
-	CLC
-	BCC inf	
+	STA video,X
+	INX
+	BNE inf
+	INC $00
+	LDA $00
+	JMP inf
 
 nmi
 	RTI

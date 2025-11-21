@@ -48,9 +48,9 @@ As this is a revisiting of previous projects and skills, I feel the need to try 
 <b>Pictures:</b><br>
 Pictures of the PCB design, Gerber files also included.<br>
 <img src="Neon6502-Design.png"><br>
-Soldered PCB with all components.  No bodges!<br>
-<img src="Neon6502-PCB.jpg"><br>
 Testing out the image converter, assembly code, and simulator.<br>
 <img src="Neon6502-Simulated.png"><br>
+Soldered PCB with all components.  No bodges!<br>
+<img src="Neon6502-PCB.jpg"><br>
 Actual program on VGA monitor.<br>
 <img src="Neon6502-Actual.jpg"><br>

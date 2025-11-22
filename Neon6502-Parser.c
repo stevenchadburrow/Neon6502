@@ -45,7 +45,7 @@ int main(const int argc, const char **argv)
 	int mode = 0;
 
 	unsigned char memory[65536];
-	unsigned int location = 0;
+	unsigned long location = 0;
 
 	for (unsigned int i=0; i<65536; i++)
 	{
@@ -87,6 +87,7 @@ int main(const int argc, const char **argv)
 				}
 
 				memory[location] = buffer[0] * 16 + buffer[1];
+
 				location++;
 			}
 		}	

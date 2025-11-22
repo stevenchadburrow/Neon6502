@@ -18,6 +18,9 @@ int opengl_window_x = 640;
 int opengl_window_y = 480;
 int opengl_keyboard_state[512];
 
+unsigned char button_flag = 0;
+unsigned char button_state = 0;
+
 
 unsigned char cpu_memory[0x10000]; // 64KB of addressable space
 
@@ -39,6 +42,14 @@ void cpu_write(unsigned long addr, unsigned char val)
 	if (addr < 0x8000)
 	{
 		cpu_memory[addr] = val;
+	}
+	else if (addr < 0xC000)
+	{	
+		button_flag = 1;
+	}
+	else
+	{
+		button_state = (button_state << 1);
 	}
 }
 
@@ -1024,7 +1035,18 @@ int main(const int argc, const char **argv)
 
 		while (loop > 0)
 		{
+			if ((button_state & 0x80) == 0x80) cpu_flag_v = 1;
+
 			temp_cycles = cpu_run();
+
+			if (temp_cycles == 0)
+			{
+				printf("Unknown Opcode $%02X at $%04X, A=$%02X, X=$%02X, Y=$%02X\n", 
+					(unsigned int)cpu_opcode, (unsigned int)cpu_reg_pc, 
+					(unsigned int)cpu_reg_a, (unsigned int)cpu_reg_x, (unsigned int)cpu_reg_y);
+
+				return 0;
+			}
 
 			scanline_cycles += temp_cycles;
 
@@ -1050,15 +1072,22 @@ int main(const int argc, const char **argv)
 				loop = 0;
 			}
 
-			if (opengl_keyboard_state[GLFW_KEY_W] == 1) { }
-			if (opengl_keyboard_state[GLFW_KEY_S] == 1) { }
-			if (opengl_keyboard_state[GLFW_KEY_A] == 1) { }
-			if (opengl_keyboard_state[GLFW_KEY_D] == 1) { }
+			if (button_flag == 1)
+			{
+				button_flag = 0;
 
-			if (opengl_keyboard_state[GLFW_KEY_I] == 1) { }
-			if (opengl_keyboard_state[GLFW_KEY_K] == 1) { }
-			if (opengl_keyboard_state[GLFW_KEY_J] == 1) { }
-			if (opengl_keyboard_state[GLFW_KEY_L] == 1) { }
+				button_state = 0xFF;
+
+				if (opengl_keyboard_state[GLFW_KEY_W] == 1) { button_state &= 0xFE; }
+				if (opengl_keyboard_state[GLFW_KEY_S] == 1) { button_state &= 0xFD; }
+				if (opengl_keyboard_state[GLFW_KEY_A] == 1) { button_state &= 0xFB; }
+				if (opengl_keyboard_state[GLFW_KEY_D] == 1) { button_state &= 0xF7; }
+
+				if (opengl_keyboard_state[GLFW_KEY_I] == 1) { button_state &= 0xEF; }
+				if (opengl_keyboard_state[GLFW_KEY_K] == 1) { button_state &= 0xDF; }
+				if (opengl_keyboard_state[GLFW_KEY_J] == 1) { button_state &= 0xBF; }
+				if (opengl_keyboard_state[GLFW_KEY_L] == 1) { button_state &= 0x7F; }
+			}
 		}
 
 		if (glfwWindowShouldClose(window)) running = 0; // makes ESCAPE exit program

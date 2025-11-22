@@ -50,7 +50,10 @@ Pictures of the PCB design, Gerber files also included.<br>
 <img src="Neon6502-Design.png"><br>
 Testing out the image converter, assembly code, and simulator.<br>
 <img src="Neon6502-Simulated.png"><br>
-Soldered PCB with all components.  No bodges!<br>
+Soldered PCB with all components.  Only one bodge wire!<br>
 <img src="Neon6502-PCB.jpg"><br>
 Actual program on VGA monitor.<br>
 <img src="Neon6502-Actual.jpg"><br>
+Tetra is always the first game.<br>
+<img src="Neon6502-Tetra.jpg"><br>
+

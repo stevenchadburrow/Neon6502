@@ -46,7 +46,7 @@ As this is a revisiting of previous projects and skills, I feel the need to try 
 - Nov 2025: And here we are, creating "Neon6502".  There is my journey.
 
 <b>Pictures:</b><br>
-Pictures of the PCB design, Gerber files also included.<br>
+Pictures of the PCB design, some footprints too small. Gerber files included.<br>
 <img src="Neon6502-Design.png"><br>
 Testing out the image converter, assembly code, and simulator.<br>
 <img src="Neon6502-Simulated.png"><br>

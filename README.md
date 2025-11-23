@@ -56,4 +56,9 @@ Actual program on VGA monitor.<br>
 <img src="Neon6502-Actual.jpg"><br>
 Tetra is always the first game.<br>
 <img src="Neon6502-Tetra.jpg"><br>
+Enclosure uses same color palette.<br>
+<img src="Neon6502-Enclosure1.jpg"><br>
+Ports fit flush with enclosure.<br>
+<img src="Neon6502-Enclosure2.jpg"><br>
+
 

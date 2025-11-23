@@ -859,12 +859,18 @@ draw_piece_collision_sub_2
 	CMP #$01
 	BEQ draw_piece_collision_sub_3
 	LDA prev_y
-	BEQ draw_piece_collision_sub_4
+	BEQ draw_piece_collision_sub_5
 	LDA #$AA
 	STA piece_color
 draw_piece_collision_sub_3
-	JMP draw_piece
+	JSR buttons ; prevents lockup
+	LDA buttons_value
+	AND #$0A
+	BEQ draw_piece_collision_sub_4
+	JMP reset
 draw_piece_collision_sub_4
+	JMP draw_piece
+draw_piece_collision_sub_5
 	LDA #$00
 	STA piece_color
 	RTS

@@ -53,11 +53,11 @@ int main(const int argc, const char **argv)
 			}
 			else if (red >= 0xC0 && green < 0xC0 && blue < 0xC0) // red
 			{
-				pixel[pos] = 0x80;
+				pixel[pos] = 0x40; // flipped
 			}
 			else if (red < 0xC0 && (green >= 0xC0 && blue >= 0xC0)) // cyan
 			{
-				pixel[pos] = 0x40;
+				pixel[pos] = 0x80; // flipped
 			}
 			else
 			{

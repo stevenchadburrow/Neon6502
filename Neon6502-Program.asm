@@ -27,34 +27,45 @@ piece_y .EQU $03
 prev_rot .EQU $04
 prev_x .EQU $05
 prev_y .EQU $06
-
 block_color .EQU $07
 block_x .EQU $08
 block_y .EQU $09
-
 frame_counter .EQU $0A
 piece_descend .EQU $0B
 piece_color .EQU $0C
 piece_next .EQU $0D
-lines_low .EQU $0E
-lines_high .EQU $0F
-buttons_value .EQU $10
-buttons_wait .EQU $11
-buttons_delay .EQU $12
-random_value .EQU $13
+piece_speed .EQU $0E
+random_value .EQU $0F
+lines_low .EQU $10
+lines_high .EQU $11
+buttons_value .EQU $12
+buttons_wait .EQU $13
+buttons_delay .EQU $14
+digit_value .EQU $15
+digit_x .EQU $16
+digit_y .EQU $17
+draw_flag .EQU $18
+wait_rot .EQU $19
+bag_pos .EQU $1A
 
+bag_array .EQU $0020 ; uses 7 bytes
 
-draw_func .EQU $0018
-draw_x .EQU $0019
-draw_y .EQU $001A
-draw_rts .EQU $001B
+get_func .EQU $0030
+get_low .EQU $0031
+get_high .EQU $0032
+get_rts .EQU $0033
 
-grab_func .EQU $001C
-grab_low .EQU $001D
-grab_high .EQU $001E
-grab_rts .EQU $001F
+put_func .EQU $0034
+put_low .EQU $0035
+put_high .EQU $0036
+put_rts .EQU $0037
 
-rand_func .EQU $0020 ; current = 5 * previous + 17, uses 12 bytes
+seq_func .EQU $0038
+seq_low .EQU $0039
+seq_high .EQU $003A
+seq_rts .EQU $003B
+
+rand_func .EQU $0040 ; current = 5 * previous + 17, uses 12 bytes
 
 grid_page .EQU $0200
 
@@ -72,40 +83,74 @@ reset
 	LDA #$00
 	STA lines_high
 
+	JSR draw_bag
+	LDA bag_array
+	STA piece_next
+	INC bag_pos
+		
+	LDA #$3C ; $3C = 1 second, $1E = 0.5 seconds, $0F = 0.25 seconds
+	STA piece_speed
+
+	LDA #$FF
+	STA wait_rot
+
+	LDA #$01
+	STA draw_flag
+
 	JMP loop_new
 
 loop
+	JSR draw_next
+	JSR draw_score
 	JSR buttons
 	LDA buttons_value
 	AND #$0A
 	BNE reset
 	JSR draw_moves
 	LDA piece_descend
-	BEQ loop_draw
+	BEQ loop_wait
 	LDA #$02
 	STA piece_descend
+	LDA piece_rot
+	CMP prev_rot
+	BEQ loop_prev
+	STA wait_rot
 	LDA prev_rot
 	STA piece_rot
+loop_prev
 	LDA prev_x
 	STA piece_x
 	LDA prev_y
 	STA piece_y
 	INC piece_y
+	JMP loop_draw
+loop_wait
+	LDA wait_rot
+	CMP #$FF
+	BEQ loop_draw
+	LDA piece_rot
+	STA prev_rot
+	LDA wait_rot
+	STA piece_rot
+	LDA #$FF
+	STA wait_rot
 loop_draw
 	JSR draw_walls
 	JSR draw_piece
 	LDA #$00
 	STA piece_descend
 	LDA piece_color
-	CMP #$AA
-	BEQ loop_grid
 	CMP #$55
+	BEQ loop_grid
+	CMP #$AA
 	BEQ loop_new
 loop_inf
 	JSR buttons
 	LDA buttons_value
 	AND #$0A
-	BNE reset
+	BEQ loop_jump
+	JMP reset
+loop_jump
 	JMP loop_inf
 
 loop_grid
@@ -115,11 +160,15 @@ loop_grid
 loop_new
 	LDA piece_next
 	STA piece_type
-loop_find
-	JSR rand_func
-	AND #$07
-	BEQ loop_find
-	STA piece_type
+	LDX bag_pos
+	LDA bag_array,X
+	STA piece_next
+	INC bag_pos
+	LDA bag_pos
+	CMP #$07
+	BNE loop_create
+	JSR draw_bag
+loop_create
 	LDA #$00
 	STA piece_rot
 	LDA #$00
@@ -132,7 +181,7 @@ loop_find
 	STA piece_y
 	LDA #$00
 	STA prev_y
-	LDA #$AA
+	LDA #$55
 	STA piece_color
 	LDA #$00
 	STA piece_descend
@@ -144,21 +193,31 @@ loop_find
 
 setup
 	LDA #$8D ; STAa
-	STA draw_func
+	STA put_func
 	LDA #$00
-	STA draw_x
+	STA put_low
 	LDA #$00
-	STA draw_y
+	STA put_high
 	LDA #$60 ; RTS
-	STA draw_rts
+	STA put_rts
+
 	LDA #$AD ; LDAa
-	STA grab_func
+	STA get_func
 	LDA #$00
-	STA grab_low
+	STA get_low
 	LDA #$00
-	STA grab_high
+	STA get_high
 	LDA #$60 ; RTS
-	STA grab_rts
+	STA get_rts
+
+	LDA #$BD ; LDAax
+	STA seq_func
+	LDA #$00
+	STA seq_low
+	LDA #$00
+	STA seq_high
+	LDA #$60 ; RTS
+	STA seq_rts
 
 	LDA #$A5 ; LDAz
 	STA rand_func+0
@@ -190,17 +249,17 @@ setup
 
 clear
 	LDA #<video
-	STA draw_x
+	STA put_low
 	LDA #>video
-	STA draw_y
+	STA put_high
 clear_sub_1
 	LDA #$00
 clear_sub_2
-	JSR draw_func
-	INC draw_x
+	JSR put_func
+	INC put_low
 	BNE clear_sub_2
-	INC draw_y
-	LDA draw_y
+	INC put_high
+	LDA put_high
 	CMP #$80
 	BNE clear_sub_1
 	LDX #$00
@@ -237,93 +296,170 @@ buttons_sub_2
 
 	
 draw_block
+	TXA
+	PHA
+	TYA
+	PHA
+
+	LDX #$00
+	LDA block_color
+	BNE draw_block_sub_1
+	LDA #<draw_block_data_0
+	STA seq_low
+	LDA #>draw_block_data_0
+	STA seq_high
+	JMP draw_block_sequence
+draw_block_sub_1
+	CMP #$55
+	BNE draw_block_sub_2
+	LDA #<draw_block_data_1
+	STA seq_low
+	LDA #>draw_block_data_1
+	STA seq_high
+	JMP draw_block_sequence
+draw_block_sub_2
+	CMP #$AA
+	BNE draw_block_sub_3
+	LDA #<draw_block_data_2
+	STA seq_low
+	LDA #>draw_block_data_2
+	STA seq_high
+	JMP draw_block_sequence
+draw_block_sub_3
+	CMP #$FF
+	BNE draw_block_sub_4
+	LDA #<draw_block_data_3
+	STA seq_low
+	LDA #>draw_block_data_3
+	STA seq_high
+	JMP draw_block_sequence
+draw_block_sub_4
+	PLA
+	TAY
+	PLA
+	TAX
+	RTS
+
+draw_block_sequence
 	LDA block_y
 	ASL A
 	ASL A
 	CLC
 	ADC #>video
-	STA draw_y
+	CLC
+	ADC #$10 ; vertical shift
+	STA put_high
 	LDA block_x
 	ASL A
 	CLC
 	ADC #<video
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
-	LDA draw_x
+	CLC
+	ADC #$14 ; horizontal shift
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
 
-	INC draw_y
+	INC put_high
 
-	LDA draw_x
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
-	LDA draw_x
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
 	
-	INC draw_y
+	INC put_high
 
-	LDA draw_x
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
-	LDA draw_x
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
 	
-	INC draw_y
+	INC put_high
 
-	LDA draw_x
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
-	LDA draw_x
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	LDA put_low
 	CLC
 	ADC #$7F
-	STA draw_x
-	LDA block_color
-	JSR draw_func
-	INC draw_x
-	JSR draw_func
+	STA put_low
+	JSR seq_func
+	INX
+	JSR put_func
+	INC put_low
+	JSR seq_func
+	INX
+	JSR put_func
 
+	PLA
+	TAY
+	PLA
+	TAX
 	RTS
 
 
 draw_moves
 	LDA piece_color
-	CMP #$AA
+	CMP #$55
 	BEQ draw_moves_sub_1
 	RTS
 draw_moves_sub_1
@@ -344,7 +480,7 @@ draw_moves_sub_1
 	CLC
 	ADC #$01
 	STA piece_x
-	LDA #$02
+	LDA #$01 ; horizontal speed
 	STA buttons_delay
 	JSR rand_func ; to help randomize
 draw_moves_sub_2
@@ -359,7 +495,7 @@ draw_moves_sub_2
 	SEC
 	SBC #$01
 	STA piece_x
-	LDA #$02
+	LDA #$01 ; horizontal speed
 	STA buttons_delay
 	JSR rand_func ; to help randomize
 draw_moves_sub_3
@@ -424,7 +560,7 @@ draw_walls
 	LDY #$00
 draw_walls_sub_1
 	LDA grid_page,X
-	CMP #$55
+	CMP #$AA
 	BEQ draw_walls_sub_2
 	LDA draw_walls_data,Y
 	STA grid_page,X
@@ -500,22 +636,22 @@ draw_piece_i
 	RTS
 draw_piece_i_0
 	LDA #<piece_data_i_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_i_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_i_1
 	LDA #<piece_data_i_1
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_i_1
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_o
 	LDA #<piece_data_o_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_o_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_t
@@ -531,27 +667,27 @@ draw_piece_t
 	RTS
 draw_piece_t_0
 	LDA #<piece_data_t_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_t_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_t_1
 	LDA #<piece_data_t_1
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_t_1
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_t_2
 	LDA #<piece_data_t_2
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_t_2
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_t_3
 	LDA #<piece_data_t_3
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_t_3
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_j
@@ -567,27 +703,27 @@ draw_piece_j
 	RTS
 draw_piece_j_0
 	LDA #<piece_data_j_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_j_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_j_1
 	LDA #<piece_data_j_1
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_j_1
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_j_2
 	LDA #<piece_data_j_2
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_j_2
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_j_3
 	LDA #<piece_data_j_3
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_j_3
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_l
@@ -603,27 +739,27 @@ draw_piece_l
 	RTS
 draw_piece_l_0
 	LDA #<piece_data_l_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_l_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_l_1
 	LDA #<piece_data_l_1
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_l_1
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_l_2
 	LDA #<piece_data_l_2
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_l_2
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_l_3
 	LDA #<piece_data_l_3
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_l_3
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_s
@@ -639,15 +775,15 @@ draw_piece_s
 	RTS
 draw_piece_s_0
 	LDA #<piece_data_s_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_s_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_s_1
 	LDA #<piece_data_s_1
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_s_1
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_z
@@ -663,29 +799,29 @@ draw_piece_z
 	RTS
 draw_piece_z_0
 	LDA #<piece_data_z_0
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_z_0
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 draw_piece_z_1
 	LDA #<piece_data_z_1
-	STA grab_low
+	STA get_low
 	LDA #>piece_data_z_1
-	STA grab_high
+	STA get_high
 	JMP draw_piece_collision
 
 draw_piece_collision
 	TXA
 	PHA
-	LDA grab_high
+	LDA get_high
 	PHA
-	LDA grab_low
+	LDA get_low
 	PHA
 	LDA #$00
 	PHA
 	LDY #$00
 draw_piece_collision_sub_1
-	JSR grab_func
+	JSR get_func
 	BEQ draw_piece_collision_sub_2
 	LDA grid_page,X
 	BEQ draw_piece_collision_sub_2
@@ -700,7 +836,7 @@ draw_piece_collision_sub_1
 	ADC #$01
 	PHA
 draw_piece_collision_sub_2
-	INC grab_low
+	INC get_low
 	INX
 	INY
 	TYA
@@ -724,7 +860,7 @@ draw_piece_collision_sub_2
 	BEQ draw_piece_collision_sub_3
 	LDA prev_y
 	BEQ draw_piece_collision_sub_4
-	LDA #$55
+	LDA #$AA
 	STA piece_color
 draw_piece_collision_sub_3
 	JMP draw_piece
@@ -735,20 +871,20 @@ draw_piece_collision_sub_4
 
 draw_piece_grid
 	PLA
-	STA grab_low
+	STA get_low
 	PLA
-	STA grab_high
+	STA get_high
 	PLA
 	TAX
 	LDY #$00
 draw_piece_grid_sub_1
-	JSR grab_func
+	JSR get_func
 	BEQ draw_piece_grid_sub_2
-	JSR grab_func
+	JSR get_func
 	AND piece_color
 	STA grid_page,X
 draw_piece_grid_sub_2
-	INC grab_low
+	INC get_low
 	INX
 	INY
 	TYA
@@ -761,9 +897,9 @@ draw_piece_grid_sub_2
 	CPY #$10
 	BNE draw_piece_grid_sub_1
 	LDA piece_color
-	CMP #$55
+	CMP #$AA
 	BEQ draw_piece_grid_sub_3
-	LDA #$AA
+	LDA #$55
 	STA piece_color
 	RTS
 draw_piece_grid_sub_3
@@ -771,6 +907,12 @@ draw_piece_grid_sub_3
 
 
 draw_grid
+	LDA draw_flag
+	BNE draw_grid_sub_1
+	RTS
+draw_grid_sub_1
+	LDA #$00
+	STA draw_flag
 	LDX #$00
 	LDY #$00
 	LDA #$00
@@ -779,22 +921,22 @@ draw_grid
 	STA block_y
 	LDA #$00
 	PHA
-draw_grid_sub_1
+draw_grid_sub_2
 	LDA grid_page,X
 	STA block_color
-	CMP #$55
-	BNE draw_grid_sub_2
+	CMP #$AA
+	BNE draw_grid_sub_3
 	PLA
 	CLC
 	ADC #$01
 	PHA
-	LDA #$55
-draw_grid_sub_2
+	LDA #$AA
+draw_grid_sub_3
 	JSR draw_block
 	INC block_x
 	INY
 	CPY #$0C
-	BNE draw_grid_sub_3
+	BNE draw_grid_sub_4
 	LDY #$00
 	LDA #$00
 	STA block_x
@@ -804,40 +946,218 @@ draw_grid_sub_2
 	LDA #$00
 	PHA
 	INC block_y
-draw_grid_sub_3
+draw_grid_sub_4
 	INX
 	CPX #$FC
-	BNE draw_grid_sub_1
+	BNE draw_grid_sub_2
 	PLA
+	JSR draw_top
 	RTS
 
 draw_line
 	INC lines_low
 	LDA lines_low
+	AND #$03
 	BNE draw_line_sub_1
-	INC lines_high
+	DEC piece_speed
+	LDA piece_speed
+	CMP #$0F
+	BCS draw_line_sub_1
+	LDA #$0F
+	STA piece_speed
 draw_line_sub_1
+	LDA lines_low
+	CMP #$64 ; 100 in decimal
+	BNE draw_line_sub_2
+	LDA #$00
+	STA lines_low
+	INC lines_high
+draw_line_sub_2
 	LDX block_y
 	LDA #$00
-draw_line_sub_2
+draw_line_sub_3
 	CLC
 	ADC #$0C
 	DEX
-	BNE draw_line_sub_2
+	BNE draw_line_sub_3
 	CLC
 	ADC #$0C
 	TAX
 	SEC
 	SBC #$0C
 	TAY
-draw_line_sub_3
+draw_line_sub_4
 	LDA grid_page,Y
 	STA grid_page,X
 	DEX
 	DEY
-	BNE draw_line_sub_3
+	BNE draw_line_sub_4
 	JMP draw_grid
+
+draw_top
+	LDX #$14
+draw_top_sub_1
+	LDA #$44
+	STA $1600,X
+	INX
+	TXA
+	CMP #$2C
+	BNE draw_top_sub_1
+	LDX #$94
+draw_top_sub_2
+	LDA #$11
+	STA $1600,X
+	INX
+	TXA
+	CMP #$AC
+	BNE draw_top_sub_2
+	LDX #$14
+draw_top_sub_3
+	LDA #$44
+	STA $1700,X
+	INX
+	TXA
+	CMP #$2C
+	BNE draw_top_sub_3
+	LDX #$94
+draw_top_sub_4
+	LDA #$11
+	STA $1700,X
+	INX
+	TXA
+	CMP #$AC
+	BNE draw_top_sub_4
+	RTS
 	
+
+draw_score
+	LDA lines_low
+	PHA
+	LDA lines_high
+	PHA
+	LDY #$02
+	LDA #$28
+	STA digit_x
+	LDA #$10
+	STA digit_y
+draw_score_sub_1
+	PLA
+	LDX #$00
+draw_score_sub_2
+	INX	
+	SEC
+	SBC #$0A
+	BCS draw_score_sub_2
+	CLC
+	ADC #$0A
+	PHA
+	DEX
+	TXA
+	STA digit_value
+	JSR draw_digit
+	INC digit_x
+	PLA
+	STA digit_value
+	JSR draw_digit
+	INC digit_x
+	DEY
+	BNE draw_score_sub_1
+	RTS
+
+
+draw_digit
+	LDA digit_x
+	STA put_low
+	LDA digit_y
+	STA put_high
+	LDA #<draw_digit_data
+	STA get_low
+	LDA #>draw_digit_data
+	STA get_high
+	LDA digit_value
+	ASL A
+	ASL A
+	ASL A
+	CLC
+	ADC get_low
+	STA get_low
+	LDX #$06
+draw_digit_sub_1
+	JSR get_func
+	JSR put_func
+	INC get_low
+	LDA put_low
+	CLC
+	ADC #$80
+	STA put_low
+	BCC draw_digit_sub_2
+	INC put_high
+draw_digit_sub_2
+	DEX
+	BNE draw_digit_sub_1
+	RTS
+
+
+draw_next
+	LDA #$14
+	STA put_low
+	LDA #$10
+	STA put_high
+	LDA #<draw_next_data
+	STA get_low
+	LDA #>draw_next_data
+	STA get_high
+	LDA piece_next
+	ASL A
+	ASL A
+	ASL A	
+	CLC
+	ADC get_low
+	STA get_low
+	LDX #$06
+draw_next_sub_1
+	JSR get_func
+	JSR put_func
+	INC get_low
+	LDA put_low
+	CLC
+	ADC #$80
+	STA put_low
+	BCC draw_next_sub_2
+	INC put_high
+draw_next_sub_2
+	DEX
+	BNE draw_next_sub_1
+	RTS
+
+draw_bag
+	LDY #$01
+	LDA #$FF
+	STA bag_array
+	STA bag_array+1
+	STA bag_array+2
+	STA bag_array+3
+	STA bag_array+4
+	STA bag_array+5
+	STA bag_array+6
+draw_bag_sub_1
+	JSR rand_func
+	AND #$07
+	BEQ draw_bag_sub_1
+	TAX
+	DEX
+	LDA bag_array,X
+	CMP #$FF
+	BNE draw_bag_sub_1
+	TYA
+	STA bag_array,X
+	INY
+	CPY #$08
+	BNE draw_bag_sub_1
+	LDA #$00
+	STA bag_pos
+	RTS
+
 
 	.ORG $C000
 
@@ -961,16 +1281,78 @@ draw_walls_data
 	.BYTE $00,$00,$00,$FF
 	.BYTE $00,$00,$00,$00
 
+draw_digit_data
+	.BYTE $3F,$33,$33,$33,$3F,$00,$00,$00
+	.BYTE $03,$03,$03,$03,$03,$00,$00,$00
+	.BYTE $3F,$03,$3F,$30,$3F,$00,$00,$00
+	.BYTE $3F,$03,$3F,$03,$3F,$00,$00,$00
+	.BYTE $33,$33,$3F,$03,$03,$00,$00,$00
+	.BYTE $3F,$30,$3F,$03,$3F,$00,$00,$00
+	.BYTE $3F,$30,$3F,$33,$3F,$00,$00,$00
+	.BYTE $3F,$03,$03,$03,$03,$00,$00,$00
+	.BYTE $3F,$33,$3F,$33,$3F,$00,$00,$00
+	.BYTE $3F,$33,$3F,$03,$3F,$00,$00,$00
+	.BYTE $00,$00,$00,$00,$00,$00,$00,$00
+	.BYTE $00,$00,$00,$00,$00,$00,$00,$00
 
+draw_next_data
+	.BYTE $00,$00,$00,$00,$00,$00,$00,$00
+	.BYTE $3F,$0C,$0C,$0C,$3F,$00,$00,$00
+	.BYTE $3F,$33,$33,$33,$3F,$00,$00,$00
+	.BYTE $3F,$0C,$0C,$0C,$0C,$00,$00,$00
+	.BYTE $03,$03,$03,$03,$3F,$00,$00,$00
+	.BYTE $30,$30,$30,$30,$3F,$00,$00,$00
+	.BYTE $3F,$30,$3F,$03,$3F,$00,$00,$00
+	.BYTE $3F,$03,$3F,$30,$3F,$00,$00,$00
 
+draw_block_data_0
+	.BYTE $00,$00
+	.BYTE $00,$00
+	.BYTE $00,$00
+	.BYTE $00,$00
+	.BYTE $00,$00
+	.BYTE $00,$00
+	.BYTE $00,$00
+	.BYTE $00,$00
+
+draw_block_data_1
+	.BYTE $FF,$FF
+	.BYTE $C0,$00
+	.BYTE $C5,$55
+	.BYTE $C5,$55
+	.BYTE $C5,$55
+	.BYTE $C5,$55
+	.BYTE $C5,$55
+	.BYTE $C5,$55
+
+draw_block_data_2
+	.BYTE $FF,$FF
+	.BYTE $C0,$00
+	.BYTE $CA,$AA
+	.BYTE $CA,$AA
+	.BYTE $CA,$AA
+	.BYTE $CA,$AA
+	.BYTE $CA,$AA
+	.BYTE $CA,$AA
+
+draw_block_data_3
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF
+	.BYTE $FF,$FF	
 
 
 
 nmi
 	PHA
+	INC draw_flag
 	INC frame_counter
 	LDA frame_counter
-	CMP #$1E ; $1E = 30 frames at 60 Hz = 0.5 seconds
+	CMP piece_speed
 	BNE nmi_skip
 	LDA #$00
 	STA frame_counter

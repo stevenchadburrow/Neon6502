@@ -1111,13 +1111,13 @@ int main(const int argc, const char **argv)
 					}
 					else if ((color_byte & 0xC0) == 0x80) // red/orange
 					{
-						//glColor3f(1.0f, 0.0f, 0.0f); // red
-						glColor3f(618.0f/700.0f, 308.0f/700.0f, 0.0f); // orange
+						//glColor3f(0.0f, 1.0f, 1.0f); // cyan
+						glColor3f(0.0f, 308.0f/700.0f, 618.0f/700.0f); // blue (flipped)
 					}
 					else if ((color_byte & 0xC0) == 0x40) // cyan/blue
 					{
-						//glColor3f(0.0f, 1.0f, 1.0f); // cyan
-						glColor3f(0.0f, 308.0f/700.0f, 618.0f/700.0f); // blue
+						//glColor3f(1.0f, 0.0f, 0.0f); // red
+						glColor3f(618.0f/700.0f, 308.0f/700.0f, 0.0f); // orange (flipped)
 					}
 					else if ((color_byte & 0xC0) == 0x00) // black
 					{

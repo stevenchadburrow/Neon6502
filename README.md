@@ -45,6 +45,9 @@ As this is a revisiting of previous projects and skills, I feel the need to try 
 - Sep 2025: Seeking to make the next project better than the PIC32, I started the "RPi02W-Emulators" project <a href="https://github.com/stevenchadburrow/RPi02W-Emulators">here</a>.  Using a Raspberry Pi Zero 2W, I was able to make it 'switchable' between and LCD screen and HDMI output.  Programming in Linux was very enjoyable, though ultimately this project also proved to be a failure.  It ran NES and GB games easily enough, but Gameboy Advance games were still too slow.  The screen would have a tearing effect and the audio was scratchy, mainly because I decided to user /dev/fb0 and /dev/dsp for all of my video and audio needs.  The Linux overhead just didn't make it work as well as I had wanted.  It does run Freedoom, but only on HDMI.
 - Nov 2025: And here we are, creating "Neon6502".  There is my journey.
 
+<b>Links:</b><br>
+<a href="https://www.youtube.com/shorts/nDpJQxdZJzY">Youtube Short playing Tetra</a><br>
+
 <b>Pictures:</b><br>
 Pictures of the PCB design, some footprints too small. Gerber files included.<br>
 <img src="Neon6502-Design.png"><br>
